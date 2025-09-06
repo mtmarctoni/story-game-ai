@@ -2,17 +2,17 @@ import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 
 import { type NextRequest, NextResponse } from "next/server";
-
-import { getImagePrompt } from "@/lib/prompts";
-import { DEFAULT_STORY_SETTINGS } from "@/lib/prompts";
-import { GenerateImageRequest, GenerateStoryRequest } from "@/types/game";
+import { DEFAULT_STORY_SETTINGS, getImagePrompt } from "@/lib/prompts";
+import type { GenerateImageRequest } from "@/types/game";
+import type { StorySettings } from "@/types/settings";
 
 export async function POST(request: NextRequest) {
   try {
     const {
       imagePrompt,
-      storySettings,
-    }: GenerateImageRequest & { storySettings?: any } = await request.json();
+      storySettings
+    }: GenerateImageRequest & { storySettings?: StorySettings } =
+      await request.json();
 
     const prompt = getImagePrompt(
       storySettings ?? DEFAULT_STORY_SETTINGS,
@@ -24,9 +24,9 @@ export async function POST(request: NextRequest) {
       prompt,
       providerOptions: {
         google: {
-          responseModalities: ["IMAGE"],
-        },
-      },
+          responseModalities: ["IMAGE"]
+        }
+      }
     });
 
     console.log("Generated images: ", files);

@@ -20,6 +20,13 @@
       "recommended": true,
       "suspicious": {
         "noUnknownAtRules": "off"
+      },
+      "a11y": {
+        "noLabelWithoutControl": "off",
+        "useSemanticElements": "off"
+      },
+      "performance": {
+        "noImgElement": "off"
       }
     },
     "domains": {
@@ -32,6 +39,11 @@
       "source": {
         "organizeImports": "on"
       }
+    }
+  },
+  "javascript": {
+    "formatter": {
+      "trailingCommas": "none"
     }
   }
 }

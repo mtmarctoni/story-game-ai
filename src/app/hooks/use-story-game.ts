@@ -1,6 +1,6 @@
 import { useState } from "react";
-import type { GameMessage, GenerateStoryResponse } from "@/types/game";
 import { DEFAULT_STORY_SETTINGS } from "@/lib/prompts";
+import type { GameMessage, GenerateStoryResponse } from "@/types/game";
 import type { StorySettings } from "@/types/settings";
 
 export function useStoryGame(initialSettings?: StorySettings) {
@@ -16,7 +16,7 @@ export function useStoryGame(initialSettings?: StorySettings) {
     try {
       const response = await fetch("/api/generate-story", {
         method: "POST",
-        body: JSON.stringify({ isStart: true, storySettings }),
+        body: JSON.stringify({ isStart: true, storySettings })
       });
       if (!response.ok) {
         throw new Error("Failed to generate story");
@@ -27,7 +27,7 @@ export function useStoryGame(initialSettings?: StorySettings) {
         id: messageId,
         role: "assistant",
         content: data.narrative,
-        imageLoading: true,
+        imageLoading: true
       };
       setMessages([newMessage]);
       generateImage(messageId, data.imagePrompt);
@@ -43,8 +43,8 @@ export function useStoryGame(initialSettings?: StorySettings) {
       const response = await fetch("/api/generate-image", {
         method: "POST",
         body: JSON.stringify({
-          imagePrompt: imagePrompt,
-        }),
+          imagePrompt: imagePrompt
+        })
       });
 
       if (!response.ok) {
@@ -62,7 +62,7 @@ export function useStoryGame(initialSettings?: StorySettings) {
           return message;
         })
       );
-    } catch (error) {
+    } catch (_error) {
       setMessages((prevMessages) =>
         prevMessages.map((message) => {
           if (message.id === messageId) {
@@ -81,7 +81,7 @@ export function useStoryGame(initialSettings?: StorySettings) {
     const userMessage: GameMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: input,
+      content: input
     };
     setIsLoading(true);
     setInput("");
@@ -93,8 +93,8 @@ export function useStoryGame(initialSettings?: StorySettings) {
           userMessage: input,
           conversationHistory: messages,
           isStart: false,
-          storySettings,
-        }),
+          storySettings
+        })
       });
       if (!response.ok) {
         throw new Error("Failed to generate story");
@@ -105,7 +105,7 @@ export function useStoryGame(initialSettings?: StorySettings) {
         id: messageId,
         role: "assistant",
         content: data.narrative,
-        imageLoading: true,
+        imageLoading: true
       };
       setMessages((prevMessages) => [...prevMessages, assistantMessage]);
       generateImage(messageId, data.imagePrompt);
@@ -127,6 +127,6 @@ export function useStoryGame(initialSettings?: StorySettings) {
     startGame,
     handleSubmit,
     handleInputChange,
-    setStorySettings,
+    setStorySettings
   };
 }

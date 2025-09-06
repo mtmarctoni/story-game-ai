@@ -12,10 +12,10 @@ export const DEFAULT_STORY_SETTINGS_LIST: StorySettings[] = [
     invitePhrases: [
       "What do you test?",
       "Where do you seek refuge?",
-      "How do you prepare for the horde?",
+      "How do you prepare for the horde?"
     ],
     imageStyle:
-      "pixel art, 16:9 aspect ratio, 8-bit retro gaming aesthetics, limited dark color palette, landscape format, clear definition, depicting a ruined city or lab",
+      "pixel art, 16:9 aspect ratio, 8-bit retro gaming aesthetics, limited dark color palette, landscape format, clear definition, depicting a ruined city or lab"
   },
   {
     genre: "Epic Fantasy Adventure",
@@ -28,10 +28,10 @@ export const DEFAULT_STORY_SETTINGS_LIST: StorySettings[] = [
     invitePhrases: [
       "What ancient artifact do you seek?",
       "Where do you journey to gather allies?",
-      "What forgotten spell do you try to remember?",
+      "What forgotten spell do you try to remember?"
     ],
     imageStyle:
-      "digital painting style, vibrant and luminous colors, fantasy landscape with mountains and dragons, magical elements like glowing runes or spells, 16:9 aspect ratio",
+      "digital painting style, vibrant and luminous colors, fantasy landscape with mountains and dragons, magical elements like glowing runes or spells, 16:9 aspect ratio"
   },
   {
     genre: "Cyberpunk Mystery",
@@ -44,31 +44,31 @@ export const DEFAULT_STORY_SETTINGS_LIST: StorySettings[] = [
     invitePhrases: [
       "What system do you hack for clues?",
       "Which neon-lit alley do you investigate?",
-      "What informant do you trust to help you?",
+      "What informant do you trust to help you?"
     ],
     imageStyle:
-      "cyberpunk pixel art, 16:9 ratio, dark and moody neon colors, rainy streets, futuristic cityscapes, androids, and complex data visuals",
-  },
+      "cyberpunk pixel art, 16:9 ratio, dark and moody neon colors, rainy streets, futuristic cityscapes, androids, and complex data visuals"
+  }
 ];
 
 export const UI_MESSAGES = {
   LOADING: {
     STORY: "Generating story...",
-    IMAGE: "Generating image...",
+    IMAGE: "Generating image..."
   },
   ERROR: {
     STORY_GENERATION: "Error generating story",
     IMAGE_GENERATION: "Error generating image",
-    MISSING_PROMPT: "Missing prompt to generate story",
+    MISSING_PROMPT: "Missing prompt to generate story"
   },
   PLACEHOLDERS: {
     INPUT:
-      "Describe what you want to do, where to go, what to examine, or how to react...",
-  },
+      "Describe what you want to do, where to go, what to examine, or how to react..."
+  }
 };
 
 export const GAME_CONFIG = {
   IMAGE: {
-    SEPARATOR: "IMAGE: ",
-  },
+    SEPARATOR: "IMAGE: "
+  }
 };

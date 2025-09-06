@@ -2,10 +2,10 @@ import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 
 import { type NextRequest, NextResponse } from "next/server";
-
-import { getInitialStoryPrompt, getContinueStoryPrompt } from "@/lib/prompts";
 import { GAME_CONFIG } from "@/lib/consts";
-import { GenerateStoryRequest } from "@/types/game";
+import { getContinueStoryPrompt, getInitialStoryPrompt } from "@/lib/prompts";
+import type { GenerateStoryRequest } from "@/types/game";
+import type { StorySettings } from "@/types/settings";
 
 export async function POST(request: NextRequest) {
   try {
@@ -13,8 +13,9 @@ export async function POST(request: NextRequest) {
       userMessage,
       conversationHistory,
       isStart,
-      storySettings,
-    }: GenerateStoryRequest & { storySettings?: any } = await request.json();
+      storySettings
+    }: GenerateStoryRequest & { storySettings: StorySettings } =
+      await request.json();
 
     let prompt: string;
     if (isStart) {
@@ -28,7 +29,7 @@ export async function POST(request: NextRequest) {
 
     const { text } = await generateText({
       model: google("gemini-2.5-flash-lite"),
-      prompt,
+      prompt
     });
 
     const [narrative, imagePrompt] = text.split(GAME_CONFIG.IMAGE.SEPARATOR);

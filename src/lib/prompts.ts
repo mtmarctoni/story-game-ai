@@ -1,6 +1,5 @@
-import type { StorySettings } from "@/types/settings";
-
 import { DEFAULT_STORY_SETTINGS_LIST } from "@/lib/consts";
+import type { StorySettings } from "@/types/settings";
 
 export function getRandomDefaultStory(): StorySettings {
   const idx = Math.floor(Math.random() * DEFAULT_STORY_SETTINGS_LIST.length);
