@@ -12,7 +12,7 @@ import {
 } from '@/components/prompt-input';
 import { DEFAULT_STORY_SETTINGS_LIST, UI_MESSAGES } from '@/lib/consts';
 import type { StorySettings } from '@/types/settings';
-import { StoryConfig } from '@/app/componentes/story-config';
+import { StoryConfig } from '@/app/components/story-config';
 
 interface GameInputProps {
   input: string;

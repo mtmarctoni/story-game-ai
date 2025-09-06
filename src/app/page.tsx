@@ -3,10 +3,10 @@
 import { useState } from 'react';
 
 import { Conversation, ConversationContent, ConversationScrollButton } from "@/components/conversation";
-import { GameInput } from "./componentes/game-input";
-import { GameSidebar } from "./componentes/game-sidebar";
-import { GameLoader } from "./componentes/game-loader";
-import { GameMessage } from "./componentes/game-message";
+import { GameInput } from "./components/game-input";
+import { GameSidebar } from "./components/game-sidebar";
+import { GameLoader } from "./components/game-loader";
+import { GameMessage } from "./components/game-message";
 import { useStoryGame } from "./hooks/use-story-game";
 import { DEFAULT_STORY_SETTINGS } from '@/lib/prompts';
 import type { StorySettings } from '@/types/settings';
