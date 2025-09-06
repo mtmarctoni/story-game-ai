@@ -31,3 +31,16 @@ export interface GenerateStoryResponse {
   narrative: string;
   imagePrompt: string;
 }
+
+export interface ApiErrorResponse {
+  error: string;
+  code: string;
+  retryable: boolean;
+}
+
+export interface GameError {
+  message: string;
+  code: string;
+  retryable: boolean;
+  type: "story" | "image";
+}

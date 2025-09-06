@@ -59,7 +59,15 @@ export const UI_MESSAGES = {
   ERROR: {
     STORY_GENERATION: "Error generating story",
     IMAGE_GENERATION: "Error generating image",
-    MISSING_PROMPT: "Missing prompt to generate story"
+    MISSING_PROMPT: "Missing prompt to generate story",
+    QUOTA_EXHAUSTED:
+      "Free quota limit reached. Please try again later or upgrade your plan.",
+    TOKEN_LIMIT: "Your message is too long. Please try a shorter message.",
+    NETWORK_ERROR:
+      "Connection error. Please check your internet and try again.",
+    AUTH_ERROR: "API configuration issue. Please contact support.",
+    RATE_LIMITED: "Too many requests. Please wait a moment and try again.",
+    GENERIC: "Something went wrong. Please try again."
   },
   PLACEHOLDERS: {
     INPUT:

@@ -2,6 +2,7 @@ import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 
 import { type NextRequest, NextResponse } from "next/server";
+import { createErrorResponse } from "@/lib/api-error-handler";
 import { DEFAULT_STORY_SETTINGS, getImagePrompt } from "@/lib/prompts";
 import type { GenerateImageRequest } from "@/types/game";
 import type { StorySettings } from "@/types/settings";
@@ -32,10 +33,6 @@ export async function POST(request: NextRequest) {
     console.log("Generated images: ", files);
     return NextResponse.json({ image: files[0] || null });
   } catch (error) {
-    console.error("Error generating image:", error);
-    return NextResponse.json(
-      { error: "Error generating image" },
-      { status: 500 }
-    );
+    return createErrorResponse(error, "generate-image");
   }
 }

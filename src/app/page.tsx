@@ -7,6 +7,7 @@ import {
   ConversationContent,
   ConversationScrollButton
 } from "@/components/conversation";
+import { ErrorNotification } from "@/components/error-notification";
 import { DEFAULT_STORY_SETTINGS } from "@/lib/prompts";
 import type { StorySettings } from "@/types/settings";
 import { GameInput } from "./components/game-input";
@@ -24,9 +25,12 @@ export default function Home() {
     messages,
     input,
     isLoading,
+    error,
     startGame,
     handleSubmit,
     handleInputChange,
+    retryLastAction,
+    clearError,
     setStorySettings: setGameStorySettings
   } = useStoryGame(storySettings);
 
@@ -39,6 +43,10 @@ export default function Home() {
   const handleStartClick = () => {
     setGameStarted(true);
     startGame();
+  };
+
+  const handleRetry = () => {
+    retryLastAction();
   };
 
   return (
@@ -56,6 +64,17 @@ export default function Home() {
               <h1 className="text-3xl font-bold text-center mb-4">
                 Welcome to the Story Game!
               </h1>
+
+              {/* Error notification for pre-game errors */}
+              {error && (
+                <ErrorNotification
+                  message={error.message}
+                  retryable={error.retryable}
+                  onRetry={error.retryable ? handleRetry : undefined}
+                  onDismiss={clearError}
+                />
+              )}
+
               <div className="mb-4">
                 <GameInput
                   input={input}
@@ -69,10 +88,11 @@ export default function Home() {
               </div>
               <button
                 type="button"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full text-xl shadow-lg transition"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full text-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleStartClick}
+                disabled={isLoading}
               >
-                Start Game
+                {isLoading ? "Starting Game..." : "Start Game"}
               </button>
               <p className="text-center text-muted-foreground">
                 Customize your story in the sidebar, then press Start!
@@ -89,7 +109,18 @@ export default function Home() {
                 </ConversationContent>
                 <ConversationScrollButton />
               </Conversation>
+
               <div className="max-w-2xl w-full mx-auto pb-4">
+                {/* Error notification for in-game errors */}
+                {error && (
+                  <ErrorNotification
+                    message={error.message}
+                    retryable={error.retryable}
+                    onRetry={error.retryable ? handleRetry : undefined}
+                    onDismiss={clearError}
+                  />
+                )}
+
                 <GameInput
                   input={input}
                   onInputChange={handleInputChange}
