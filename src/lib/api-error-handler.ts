@@ -15,7 +15,7 @@ export const ERROR_CODES = {
   RATE_LIMITED: "RATE_LIMITED",
   NETWORK_ERROR: "NETWORK_ERROR",
   INVALID_REQUEST: "INVALID_REQUEST",
-  UNKNOWN_ERROR: "UNKNOWN_ERROR",
+  UNKNOWN_ERROR: "UNKNOWN_ERROR"
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -23,41 +23,41 @@ export const ERROR_MESSAGES = {
     userMessage:
       "You've reached the free quota limit for AI generation. Please try again later or upgrade your plan.",
     httpStatus: 429,
-    retryable: false,
+    retryable: false
   },
   [ERROR_CODES.TOKEN_LIMIT_EXCEEDED]: {
     userMessage:
       "Your request is too long. Please try a shorter message or reduce your conversation history.",
     httpStatus: 400,
-    retryable: false,
+    retryable: false
   },
   [ERROR_CODES.AUTHENTICATION_ERROR]: {
     userMessage:
       "There's an issue with the API configuration. Please contact support.",
     httpStatus: 401,
-    retryable: false,
+    retryable: false
   },
   [ERROR_CODES.RATE_LIMITED]: {
     userMessage: "Too many requests. Please wait a moment and try again.",
     httpStatus: 429,
-    retryable: true,
+    retryable: true
   },
   [ERROR_CODES.NETWORK_ERROR]: {
     userMessage:
       "Network connection error. Please check your connection and try again.",
     httpStatus: 503,
-    retryable: true,
+    retryable: true
   },
   [ERROR_CODES.INVALID_REQUEST]: {
     userMessage: "Invalid request. Please try again with different input.",
     httpStatus: 400,
-    retryable: false,
+    retryable: false
   },
   [ERROR_CODES.UNKNOWN_ERROR]: {
     userMessage: "An unexpected error occurred. Please try again.",
     httpStatus: 500,
-    retryable: true,
-  },
+    retryable: true
+  }
 } as const;
 
 type CodeError = keyof typeof ERROR_CODES;
@@ -142,7 +142,7 @@ export function parseGeminiError(error: unknown): ApiError {
     message,
     userMessage: errorConfig.userMessage,
     httpStatus: errorConfig.httpStatus,
-    retryable: errorConfig.retryable,
+    retryable: errorConfig.retryable
   };
 }
 
@@ -157,14 +157,14 @@ export function createErrorResponse(error: unknown, context?: string) {
     code: apiError.code,
     message: apiError.message,
     userMessage: apiError.userMessage,
-    originalError: error,
+    originalError: error
   });
 
   return NextResponse.json(
     {
       error: apiError.userMessage,
       code: apiError.code,
-      retryable: apiError.retryable,
+      retryable: apiError.retryable
     },
     { status: apiError.httpStatus }
   );
