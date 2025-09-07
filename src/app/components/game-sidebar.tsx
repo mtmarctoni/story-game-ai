@@ -19,12 +19,18 @@ export function GameSidebar({
   const [collapsed, setCollapsed] = useState(false);
   return (
     <aside
-      className={`transition-all duration-300 ${collapsed ? "w-12 min-w-[48px]" : "w-full md:w-96"} px-0 py-4 border-r flex flex-col h-full shadow-lg bg-gradient-to-b from-gray-900 to-gray-800 relative`}
+      className={`transition-all duration-300 ${
+        collapsed
+          ? "w-0 md:w-12 md:min-w-[48px] overflow-hidden"
+          : "w-full md:w-96"
+      } px-0 py-4 border-r flex flex-col h-full shadow-lg bg-gradient-to-b from-gray-900 to-gray-800 relative`}
     >
       <button
         type="button"
-        className="absolute top-4 right-2 z-20 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full p-1 shadow focus:outline-none"
-        title={collapsed ? "Expand sidebar" : "Collapse sidebar"}
+        className={`fixed md:absolute top-4 z-20 bg-gray-800 hover:bg-gray-700 text-gray-300 rounded-full p-2 shadow focus:outline-none transition-all duration-300 ${
+          collapsed ? "left-4 md:right-2" : "right-2"
+        }`}
+        title={collapsed ? "Show sidebar" : "Hide sidebar"}
         onClick={() => setCollapsed((c) => !c)}
       >
         {collapsed ? (
