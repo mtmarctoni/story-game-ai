@@ -50,17 +50,17 @@ export default function Home() {
   };
 
   return (
-    <div className="font-sans h-screen mx-auto overflow-hidden ">
-      <div className="flex h-full w-full">
+    <div className="font-sans h-screen mx-auto overflow-hidden">
+      <div className="flex flex-col md:flex-row h-full w-full">
         <GameSidebar
           settings={storySettings}
           editable={!gameStarted}
           isLoading={isLoading}
           onChange={handleStorySettingsChange}
         />
-        <main className="m-4 flex-1 flex flex-col items-center justify-center">
+        <main className="flex-1 flex flex-col items-center justify-center md:m-4">
           {!gameStarted ? (
-            <div className="max-w-2xl w-full mx-auto pb-4 space-y-6">
+            <div className="max-w-2xl w-full mx-auto p-4 space-y-6">
               <h1 className="text-3xl font-bold text-center mb-4">
                 Welcome to the Story Game!
               </h1>
@@ -94,8 +94,11 @@ export default function Home() {
               >
                 {isLoading ? "Starting Game..." : "Start Game"}
               </button>
-              <p className="text-center text-muted-foreground">
+              <p className="text-center text-muted-foreground md:block hidden">
                 Customize your story in the sidebar, then press Start!
+              </p>
+              <p className="text-center text-muted-foreground md:hidden">
+                Customize your story in the settings above, then press Start!
               </p>
             </div>
           ) : (
@@ -110,7 +113,7 @@ export default function Home() {
                 <ConversationScrollButton />
               </Conversation>
 
-              <div className="max-w-2xl w-full mx-auto pb-4">
+              <div className="max-w-2xl w-full mx-auto pb-4 px-4">
                 {/* Error notification for in-game errors */}
                 {error && (
                   <ErrorNotification
