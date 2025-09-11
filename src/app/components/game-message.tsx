@@ -4,9 +4,18 @@ import { Message, MessageContent } from "@/components/message";
 import { Response } from "@/components/response";
 import { UI_MESSAGES } from "@/lib/consts";
 import type { GameMessage as GameMessageType } from "@/types/game";
+import { GameErrorBanner } from "./game-error-banner";
 
-export function GameMessage({ message }: { message: GameMessageType }) {
-  const { role, content, image, imageLoading } = message;
+export function GameMessage({
+  message,
+  onRetryImage,
+  onDismissImageError
+}: {
+  message: GameMessageType;
+  onRetryImage?: (messageId: string) => void;
+  onDismissImageError?: (messageId: string) => void;
+}) {
+  const { role, content, image, imageLoading, imageError } = message;
 
   return (
     <Message from={role}>
@@ -22,7 +31,7 @@ export function GameMessage({ message }: { message: GameMessageType }) {
               </div>
             )}
 
-            {image && (
+            {image ? (
               <Image
                 base64={image.base64Data}
                 mediaType={image.mediaType}
@@ -30,6 +39,19 @@ export function GameMessage({ message }: { message: GameMessageType }) {
                 alt="ai generated image for custom story game"
                 className="w-full h-full object-cover object-center"
               />
+            ) : (
+              imageError && (
+                <GameErrorBanner
+                  error={imageError}
+                  type="warning"
+                  onRetry={
+                    imageError.retryable
+                      ? () => onRetryImage?.(message.id)
+                      : undefined
+                  }
+                  onDismiss={() => onDismissImageError?.(message.id)}
+                />
+              )
             )}
           </picture>
         )}

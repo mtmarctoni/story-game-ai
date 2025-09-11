@@ -4,6 +4,7 @@ export interface GameMessage {
   content: string;
   image?: GeneratedImage;
   imageLoading?: boolean;
+  imageError?: GameError;
 }
 
 export interface GeneratedImage {
@@ -30,4 +31,17 @@ export interface GenerateImageRequest {
 export interface GenerateStoryResponse {
   narrative: string;
   imagePrompt: string;
+}
+
+export interface ApiErrorResponse {
+  error: string;
+  code: string;
+  retryable: boolean;
+}
+
+export interface GameError {
+  message: string;
+  code: string;
+  retryable: boolean;
+  type: "story" | "image";
 }

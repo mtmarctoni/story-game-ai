@@ -2,6 +2,7 @@ import { google } from "@ai-sdk/google";
 import { generateText } from "ai";
 
 import { type NextRequest, NextResponse } from "next/server";
+import { createErrorResponse } from "@/lib/api-error-handler";
 import { GAME_CONFIG } from "@/lib/consts";
 import { getContinueStoryPrompt, getInitialStoryPrompt } from "@/lib/prompts";
 import type { GenerateStoryRequest } from "@/types/game";
@@ -35,10 +36,6 @@ export async function POST(request: NextRequest) {
     const [narrative, imagePrompt] = text.split(GAME_CONFIG.IMAGE.SEPARATOR);
     return NextResponse.json({ narrative, imagePrompt });
   } catch (error) {
-    console.error("Error generating story:", error);
-    return NextResponse.json(
-      { error: "Error generating story" },
-      { status: 500 }
-    );
+    return createErrorResponse(error, "generate-story");
   }
 }

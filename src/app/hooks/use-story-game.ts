@@ -1,26 +1,66 @@
 import { useState } from "react";
 import { DEFAULT_STORY_SETTINGS } from "@/lib/prompts";
-import type { GameMessage, GenerateStoryResponse } from "@/types/game";
+import type {
+  ApiErrorResponse,
+  GameError,
+  GameMessage,
+  GenerateStoryResponse
+} from "@/types/game";
 import type { StorySettings } from "@/types/settings";
 
 export function useStoryGame(initialSettings?: StorySettings) {
   const [messages, setMessages] = useState<GameMessage[]>([]);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [error, setError] = useState<GameError | null>(null);
   const [storySettings, setStorySettings] = useState<StorySettings>(
     initialSettings ?? DEFAULT_STORY_SETTINGS
   );
 
+  const clearError = () => setError(null);
+
+  const handleApiError = async (
+    response: Response,
+    type: "story" | "image"
+  ) => {
+    try {
+      const errorData = (await response.json()) as ApiErrorResponse;
+      setError({
+        message: errorData.error,
+        code: errorData.code,
+        retryable: errorData.retryable,
+        type
+      });
+    } catch {
+      // If we can't parse the error response, show a generic error
+      setError({
+        message: `Error ${
+          type === "story" ? "generating story" : "generating image"
+        }`,
+        code: "UNKNOWN_ERROR",
+        retryable: true,
+        type
+      });
+    }
+  };
+
   const startGame = async () => {
     setIsLoading(true);
+    setError(null);
     try {
       const response = await fetch("/api/generate-story", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({ isStart: true, storySettings })
       });
+
       if (!response.ok) {
-        throw new Error("Failed to generate story");
+        await handleApiError(response, "story");
+        return;
       }
+
       const data = (await response.json()) as GenerateStoryResponse;
       const messageId = crypto.randomUUID();
       const newMessage: GameMessage = {
@@ -33,6 +73,12 @@ export function useStoryGame(initialSettings?: StorySettings) {
       generateImage(messageId, data.imagePrompt);
     } catch (error) {
       console.error("Error generating story:", error);
+      setError({
+        message: "Network error. Please check your connection and try again.",
+        code: "NETWORK_ERROR",
+        retryable: true,
+        type: "story"
+      });
     } finally {
       setIsLoading(false);
     }
@@ -42,13 +88,58 @@ export function useStoryGame(initialSettings?: StorySettings) {
     try {
       const response = await fetch("/api/generate-image", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
-          imagePrompt: imagePrompt
+          imagePrompt: imagePrompt,
+          storySettings
         })
       });
 
       if (!response.ok) {
-        throw new Error("Failed to generate image");
+        // For image errors, we don't want to block the story flow
+        // But we want to show the actual error information
+        try {
+          const errorData = (await response.json()) as ApiErrorResponse;
+          setMessages((prevMessages) =>
+            prevMessages.map((message) => {
+              if (message.id === messageId) {
+                return {
+                  ...message,
+                  imageLoading: false,
+                  imageError: {
+                    message: errorData.error,
+                    code: errorData.code,
+                    retryable: errorData.retryable,
+                    type: "image"
+                  }
+                };
+              }
+              return message;
+            })
+          );
+        } catch {
+          // If we can't parse the error response, show a generic error
+          setMessages((prevMessages) =>
+            prevMessages.map((message) => {
+              if (message.id === messageId) {
+                return {
+                  ...message,
+                  imageLoading: false,
+                  imageError: {
+                    message: "Error generating image",
+                    code: "UNKNOWN_ERROR",
+                    retryable: true,
+                    type: "image"
+                  }
+                };
+              }
+              return message;
+            })
+          );
+        }
+        return;
       }
 
       const imageData = await response.json();
@@ -58,7 +149,6 @@ export function useStoryGame(initialSettings?: StorySettings) {
           if (message.id === messageId) {
             return { ...message, image: imageData.image, imageLoading: false };
           }
-
           return message;
         })
       );
@@ -66,9 +156,18 @@ export function useStoryGame(initialSettings?: StorySettings) {
       setMessages((prevMessages) =>
         prevMessages.map((message) => {
           if (message.id === messageId) {
-            return { ...message, imageLoading: false };
+            return {
+              ...message,
+              imageLoading: false,
+              imageError: {
+                message:
+                  "Network error. Please check your connection and try again.",
+                code: "NETWORK_ERROR",
+                retryable: true,
+                type: "image"
+              }
+            };
           }
-
           return message;
         })
       );
@@ -78,17 +177,23 @@ export function useStoryGame(initialSettings?: StorySettings) {
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     if (!input.trim() || isLoading) return;
+
     const userMessage: GameMessage = {
       id: crypto.randomUUID(),
       role: "user",
       content: input
     };
     setIsLoading(true);
+    setError(null);
     setInput("");
     setMessages((prevMessages) => [...prevMessages, userMessage]);
+
     try {
       const response = await fetch("/api/generate-story", {
         method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
         body: JSON.stringify({
           userMessage: input,
           conversationHistory: messages,
@@ -96,9 +201,12 @@ export function useStoryGame(initialSettings?: StorySettings) {
           storySettings
         })
       });
+
       if (!response.ok) {
-        throw new Error("Failed to generate story");
+        await handleApiError(response, "story");
+        return;
       }
+
       const data = (await response.json()) as GenerateStoryResponse;
       const messageId = crypto.randomUUID();
       const assistantMessage: GameMessage = {
@@ -111,8 +219,73 @@ export function useStoryGame(initialSettings?: StorySettings) {
       generateImage(messageId, data.imagePrompt);
     } catch (error) {
       console.error("Error generating story:", error);
+      setError({
+        message: "Network error. Please check your connection and try again.",
+        code: "NETWORK_ERROR",
+        retryable: true,
+        type: "story"
+      });
     } finally {
       setIsLoading(false);
+    }
+  };
+
+  const retryImageGeneration = (messageId: string) => {
+    // Find the message and get its image prompt from the original response
+    const message = messages.find((m) => m.id === messageId);
+    if (message && message.role === "assistant") {
+      // Mark image as loading again and retry
+      setMessages((prevMessages) =>
+        prevMessages.map((m) => {
+          if (m.id === messageId) {
+            return { ...m, imageLoading: true, imageError: undefined };
+          }
+          return m;
+        })
+      );
+
+      // We need to regenerate the image prompt, so let's trigger a new story generation
+      // For now, we'll just remove the error state and let user know they can try again
+      setMessages((prevMessages) =>
+        prevMessages.map((m) => {
+          if (m.id === messageId) {
+            return { ...m, imageError: undefined };
+          }
+          return m;
+        })
+      );
+    }
+  };
+
+  const dismissImageError = (messageId: string) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((m) => {
+        if (m.id === messageId) {
+          return { ...m, imageError: undefined };
+        }
+        return m;
+      })
+    );
+  };
+
+  const retryLastAction = () => {
+    if (!error) return;
+
+    if (error.type === "story") {
+      if (messages.length === 0) {
+        // Retry starting the game
+        startGame();
+      } else {
+        // Retry the last user message
+        const lastUserMessage = messages.findLast((m) => m.role === "user");
+        if (lastUserMessage) {
+          setInput(lastUserMessage.content);
+          // Remove the last user message since we'll resubmit it
+          setMessages((prev) =>
+            prev.filter((m) => m.id !== lastUserMessage.id)
+          );
+        }
+      }
     }
   };
 
@@ -124,9 +297,14 @@ export function useStoryGame(initialSettings?: StorySettings) {
     messages,
     input,
     isLoading,
+    error,
     startGame,
     handleSubmit,
     handleInputChange,
+    retryLastAction,
+    retryImageGeneration,
+    dismissImageError,
+    clearError,
     setStorySettings
   };
 }

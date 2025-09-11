@@ -7,8 +7,10 @@ import {
   ConversationContent,
   ConversationScrollButton
 } from "@/components/conversation";
+import { ErrorNotification } from "@/components/error-notification";
 import { DEFAULT_STORY_SETTINGS } from "@/lib/prompts";
 import type { StorySettings } from "@/types/settings";
+import { GameErrorStatus } from "./components/game-error-status";
 import { GameInput } from "./components/game-input";
 import { GameLoader } from "./components/game-loader";
 import { GameMessage } from "./components/game-message";
@@ -24,9 +26,14 @@ export default function Home() {
     messages,
     input,
     isLoading,
+    error,
     startGame,
     handleSubmit,
     handleInputChange,
+    retryLastAction,
+    retryImageGeneration,
+    dismissImageError,
+    clearError,
     setStorySettings: setGameStorySettings
   } = useStoryGame(storySettings);
 
@@ -41,21 +48,42 @@ export default function Home() {
     startGame();
   };
 
+  const handleRetry = () => {
+    retryLastAction();
+  };
+
   return (
-    <div className="font-sans h-screen mx-auto overflow-hidden ">
-      <div className="flex h-full w-full">
+    <div className="font-sans h-screen mx-auto overflow-hidden">
+      <div className="flex flex-col md:flex-row h-full w-full">
         <GameSidebar
           settings={storySettings}
           editable={!gameStarted}
           isLoading={isLoading}
           onChange={handleStorySettingsChange}
         />
-        <main className="m-4 flex-1 flex flex-col items-center justify-center">
+        <main className="flex-1 flex flex-col items-center justify-center md:m-4">
           {!gameStarted ? (
-            <div className="max-w-2xl w-full mx-auto pb-4 space-y-6">
+            <div className="max-w-2xl w-full mx-auto p-4 space-y-6">
               <h1 className="text-3xl font-bold text-center mb-4">
                 Welcome to the Story Game!
               </h1>
+
+              {/* Error notification for pre-game errors */}
+              {error && error.type === "story" ? (
+                <GameErrorStatus
+                  error={error}
+                  onRetry={error.retryable ? handleRetry : undefined}
+                  onDismiss={clearError}
+                />
+              ) : error ? (
+                <ErrorNotification
+                  message={error.message}
+                  retryable={error.retryable}
+                  onRetry={error.retryable ? handleRetry : undefined}
+                  onDismiss={clearError}
+                />
+              ) : null}
+
               <div className="mb-4">
                 <GameInput
                   input={input}
@@ -69,13 +97,17 @@ export default function Home() {
               </div>
               <button
                 type="button"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full text-xl shadow-lg transition"
+                className="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-6 rounded-lg w-full text-xl shadow-lg transition disabled:opacity-50 disabled:cursor-not-allowed"
                 onClick={handleStartClick}
+                disabled={isLoading}
               >
-                Start Game
+                {isLoading ? "Starting Game..." : "Start Game"}
               </button>
-              <p className="text-center text-muted-foreground">
+              <p className="text-center text-muted-foreground md:block hidden">
                 Customize your story in the sidebar, then press Start!
+              </p>
+              <p className="text-center text-muted-foreground md:hidden">
+                Customize your story in the settings above, then press Start!
               </p>
             </div>
           ) : (
@@ -83,13 +115,35 @@ export default function Home() {
               <Conversation>
                 <ConversationContent className="max-w-xl mx-auto">
                   {messages.map((message) => (
-                    <GameMessage key={message.id} message={message} />
+                    <GameMessage
+                      key={message.id}
+                      message={message}
+                      onRetryImage={retryImageGeneration}
+                      onDismissImageError={dismissImageError}
+                    />
                   ))}
                   {isLoading && <GameLoader />}
                 </ConversationContent>
                 <ConversationScrollButton />
               </Conversation>
-              <div className="max-w-2xl w-full mx-auto pb-4">
+
+              <div className="max-w-2xl w-full mx-auto pb-4 px-4">
+                {/* Error notification for in-game errors */}
+                {error && error.type === "story" ? (
+                  <GameErrorStatus
+                    error={error}
+                    onRetry={error.retryable ? handleRetry : undefined}
+                    onDismiss={clearError}
+                  />
+                ) : error ? (
+                  <ErrorNotification
+                    message={error.message}
+                    retryable={error.retryable}
+                    onRetry={error.retryable ? handleRetry : undefined}
+                    onDismiss={clearError}
+                  />
+                ) : null}
+
                 <GameInput
                   input={input}
                   onInputChange={handleInputChange}
