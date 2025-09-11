@@ -53,7 +53,7 @@ export default function Home() {
   };
 
   return (
-    <div className="font-sans h-screen mx-auto overflow-hidden">
+    <div className="font-sans h-screen mx-auto md:overflow-hidden">
       <div className="flex flex-col md:flex-row h-full w-full">
         <GameSidebar
           settings={storySettings}
@@ -61,7 +61,7 @@ export default function Home() {
           isLoading={isLoading}
           onChange={handleStorySettingsChange}
         />
-        <main className="flex-1 flex flex-col items-center justify-center md:m-4">
+        <main className="flex-1 flex flex-col items-center justify-center md:m-4 min-h-0">
           {!gameStarted ? (
             <div className="max-w-2xl w-full mx-auto p-4 space-y-6">
               <h1 className="text-3xl font-bold text-center mb-4">
@@ -111,9 +111,9 @@ export default function Home() {
               </p>
             </div>
           ) : (
-            <div className="flex flex-col h-full w-full">
+            <div className="flex flex-col h-full w-full min-h-0">
               <Conversation>
-                <ConversationContent className="max-w-xl mx-auto">
+                <ConversationContent className="max-w-xl mx-auto px-2 md:px-4">
                   {messages.map((message) => (
                     <GameMessage
                       key={message.id}
@@ -127,7 +127,7 @@ export default function Home() {
                 <ConversationScrollButton />
               </Conversation>
 
-              <div className="max-w-2xl w-full mx-auto pb-4 px-4">
+              <div className="w-full mx-auto pb-4 px-4 flex-shrink-0">
                 {/* Error notification for in-game errors */}
                 {error && error.type === "story" ? (
                   <GameErrorStatus
