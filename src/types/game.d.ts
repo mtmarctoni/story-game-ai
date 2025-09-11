@@ -4,6 +4,7 @@ export interface GameMessage {
   content: string;
   image?: GeneratedImage;
   imageLoading?: boolean;
+  imageError?: GameError;
 }
 
 export interface GeneratedImage {

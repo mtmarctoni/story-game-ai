@@ -14,6 +14,7 @@ import { GameInput } from "./components/game-input";
 import { GameLoader } from "./components/game-loader";
 import { GameMessage } from "./components/game-message";
 import { GameSidebar } from "./components/game-sidebar";
+import { GameErrorStatus } from "./components/game-error-status";
 import { useStoryGame } from "./hooks/use-story-game";
 
 export default function Home() {
@@ -30,6 +31,8 @@ export default function Home() {
     handleSubmit,
     handleInputChange,
     retryLastAction,
+    retryImageGeneration,
+    dismissImageError,
     clearError,
     setStorySettings: setGameStorySettings
   } = useStoryGame(storySettings);
@@ -66,14 +69,20 @@ export default function Home() {
               </h1>
 
               {/* Error notification for pre-game errors */}
-              {error && (
+              {error && error.type === "story" ? (
+                <GameErrorStatus
+                  error={error}
+                  onRetry={error.retryable ? handleRetry : undefined}
+                  onDismiss={clearError}
+                />
+              ) : error ? (
                 <ErrorNotification
                   message={error.message}
                   retryable={error.retryable}
                   onRetry={error.retryable ? handleRetry : undefined}
                   onDismiss={clearError}
                 />
-              )}
+              ) : null}
 
               <div className="mb-4">
                 <GameInput
@@ -106,7 +115,12 @@ export default function Home() {
               <Conversation>
                 <ConversationContent className="max-w-xl mx-auto">
                   {messages.map((message) => (
-                    <GameMessage key={message.id} message={message} />
+                    <GameMessage 
+                      key={message.id} 
+                      message={message}
+                      onRetryImage={retryImageGeneration}
+                      onDismissImageError={dismissImageError}
+                    />
                   ))}
                   {isLoading && <GameLoader />}
                 </ConversationContent>
@@ -115,14 +129,20 @@ export default function Home() {
 
               <div className="max-w-2xl w-full mx-auto pb-4 px-4">
                 {/* Error notification for in-game errors */}
-                {error && (
+                {error && error.type === "story" ? (
+                  <GameErrorStatus
+                    error={error}
+                    onRetry={error.retryable ? handleRetry : undefined}
+                    onDismiss={clearError}
+                  />
+                ) : error ? (
                   <ErrorNotification
                     message={error.message}
                     retryable={error.retryable}
                     onRetry={error.retryable ? handleRetry : undefined}
                     onDismiss={clearError}
                   />
-                )}
+                ) : null}
 
                 <GameInput
                   input={input}

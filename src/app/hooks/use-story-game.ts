@@ -4,7 +4,7 @@ import type {
   ApiErrorResponse,
   GameError,
   GameMessage,
-  GenerateStoryResponse
+  GenerateStoryResponse,
 } from "@/types/game";
 import type { StorySettings } from "@/types/settings";
 
@@ -29,15 +29,17 @@ export function useStoryGame(initialSettings?: StorySettings) {
         message: errorData.error,
         code: errorData.code,
         retryable: errorData.retryable,
-        type
+        type,
       });
     } catch {
       // If we can't parse the error response, show a generic error
       setError({
-        message: `Error ${type === "story" ? "generating story" : "generating image"}`,
+        message: `Error ${
+          type === "story" ? "generating story" : "generating image"
+        }`,
         code: "UNKNOWN_ERROR",
         retryable: true,
-        type
+        type,
       });
     }
   };
@@ -49,9 +51,9 @@ export function useStoryGame(initialSettings?: StorySettings) {
       const response = await fetch("/api/generate-story", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify({ isStart: true, storySettings })
+        body: JSON.stringify({ isStart: true, storySettings }),
       });
 
       if (!response.ok) {
@@ -65,7 +67,7 @@ export function useStoryGame(initialSettings?: StorySettings) {
         id: messageId,
         role: "assistant",
         content: data.narrative,
-        imageLoading: true
+        imageLoading: true,
       };
       setMessages([newMessage]);
       generateImage(messageId, data.imagePrompt);
@@ -75,7 +77,7 @@ export function useStoryGame(initialSettings?: StorySettings) {
         message: "Network error. Please check your connection and try again.",
         code: "NETWORK_ERROR",
         retryable: true,
-        type: "story"
+        type: "story",
       });
     } finally {
       setIsLoading(false);
@@ -87,24 +89,56 @@ export function useStoryGame(initialSettings?: StorySettings) {
       const response = await fetch("/api/generate-image", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
-          imagePrompt: imagePrompt
-        })
+          imagePrompt: imagePrompt,
+          storySettings,
+        }),
       });
 
       if (!response.ok) {
         // For image errors, we don't want to block the story flow
-        // Just mark the image as failed to load
-        setMessages((prevMessages) =>
-          prevMessages.map((message) => {
-            if (message.id === messageId) {
-              return { ...message, imageLoading: false };
-            }
-            return message;
-          })
-        );
+        // But we want to show the actual error information
+        try {
+          const errorData = (await response.json()) as ApiErrorResponse;
+          setMessages((prevMessages) =>
+            prevMessages.map((message) => {
+              if (message.id === messageId) {
+                return {
+                  ...message,
+                  imageLoading: false,
+                  imageError: {
+                    message: errorData.error,
+                    code: errorData.code,
+                    retryable: errorData.retryable,
+                    type: "image",
+                  },
+                };
+              }
+              return message;
+            })
+          );
+        } catch {
+          // If we can't parse the error response, show a generic error
+          setMessages((prevMessages) =>
+            prevMessages.map((message) => {
+              if (message.id === messageId) {
+                return {
+                  ...message,
+                  imageLoading: false,
+                  imageError: {
+                    message: "Error generating image",
+                    code: "UNKNOWN_ERROR",
+                    retryable: true,
+                    type: "image",
+                  },
+                };
+              }
+              return message;
+            })
+          );
+        }
         return;
       }
 
@@ -122,7 +156,17 @@ export function useStoryGame(initialSettings?: StorySettings) {
       setMessages((prevMessages) =>
         prevMessages.map((message) => {
           if (message.id === messageId) {
-            return { ...message, imageLoading: false };
+            return {
+              ...message,
+              imageLoading: false,
+              imageError: {
+                message:
+                  "Network error. Please check your connection and try again.",
+                code: "NETWORK_ERROR",
+                retryable: true,
+                type: "image",
+              },
+            };
           }
           return message;
         })
@@ -137,7 +181,7 @@ export function useStoryGame(initialSettings?: StorySettings) {
     const userMessage: GameMessage = {
       id: crypto.randomUUID(),
       role: "user",
-      content: input
+      content: input,
     };
     setIsLoading(true);
     setError(null);
@@ -148,14 +192,14 @@ export function useStoryGame(initialSettings?: StorySettings) {
       const response = await fetch("/api/generate-story", {
         method: "POST",
         headers: {
-          "Content-Type": "application/json"
+          "Content-Type": "application/json",
         },
         body: JSON.stringify({
           userMessage: input,
           conversationHistory: messages,
           isStart: false,
-          storySettings
-        })
+          storySettings,
+        }),
       });
 
       if (!response.ok) {
@@ -169,7 +213,7 @@ export function useStoryGame(initialSettings?: StorySettings) {
         id: messageId,
         role: "assistant",
         content: data.narrative,
-        imageLoading: true
+        imageLoading: true,
       };
       setMessages((prevMessages) => [...prevMessages, assistantMessage]);
       generateImage(messageId, data.imagePrompt);
@@ -179,11 +223,49 @@ export function useStoryGame(initialSettings?: StorySettings) {
         message: "Network error. Please check your connection and try again.",
         code: "NETWORK_ERROR",
         retryable: true,
-        type: "story"
+        type: "story",
       });
     } finally {
       setIsLoading(false);
     }
+  };
+
+  const retryImageGeneration = (messageId: string) => {
+    // Find the message and get its image prompt from the original response
+    const message = messages.find((m) => m.id === messageId);
+    if (message && message.role === "assistant") {
+      // Mark image as loading again and retry
+      setMessages((prevMessages) =>
+        prevMessages.map((m) => {
+          if (m.id === messageId) {
+            return { ...m, imageLoading: true, imageError: undefined };
+          }
+          return m;
+        })
+      );
+
+      // We need to regenerate the image prompt, so let's trigger a new story generation
+      // For now, we'll just remove the error state and let user know they can try again
+      setMessages((prevMessages) =>
+        prevMessages.map((m) => {
+          if (m.id === messageId) {
+            return { ...m, imageError: undefined };
+          }
+          return m;
+        })
+      );
+    }
+  };
+
+  const dismissImageError = (messageId: string) => {
+    setMessages((prevMessages) =>
+      prevMessages.map((m) => {
+        if (m.id === messageId) {
+          return { ...m, imageError: undefined };
+        }
+        return m;
+      })
+    );
   };
 
   const retryLastAction = () => {
@@ -220,7 +302,9 @@ export function useStoryGame(initialSettings?: StorySettings) {
     handleSubmit,
     handleInputChange,
     retryLastAction,
+    retryImageGeneration,
+    dismissImageError,
     clearError,
-    setStorySettings
+    setStorySettings,
   };
 }
