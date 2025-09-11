@@ -14,8 +14,6 @@ export function getErrorIcon(errorCode: string) {
       return <Wifi className="w-4 h-4" />;
     case "auth":
       return <Settings className="w-4 h-4" />;
-    case "invalid":
-    case "unknown":
     default:
       return <AlertTriangle className="w-4 h-4" />;
   }

@@ -10,11 +10,11 @@ import {
 import { ErrorNotification } from "@/components/error-notification";
 import { DEFAULT_STORY_SETTINGS } from "@/lib/prompts";
 import type { StorySettings } from "@/types/settings";
+import { GameErrorStatus } from "./components/game-error-status";
 import { GameInput } from "./components/game-input";
 import { GameLoader } from "./components/game-loader";
 import { GameMessage } from "./components/game-message";
 import { GameSidebar } from "./components/game-sidebar";
-import { GameErrorStatus } from "./components/game-error-status";
 import { useStoryGame } from "./hooks/use-story-game";
 
 export default function Home() {
@@ -115,8 +115,8 @@ export default function Home() {
               <Conversation>
                 <ConversationContent className="max-w-xl mx-auto">
                   {messages.map((message) => (
-                    <GameMessage 
-                      key={message.id} 
+                    <GameMessage
+                      key={message.id}
                       message={message}
                       onRetryImage={retryImageGeneration}
                       onDismissImageError={dismissImageError}

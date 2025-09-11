@@ -25,7 +25,7 @@ export const ERROR_CODES = {
   RATE_LIMITED: "RATE_LIMITED",
   NETWORK_ERROR: "NETWORK_ERROR",
   INVALID_REQUEST: "INVALID_REQUEST",
-  UNKNOWN_ERROR: "UNKNOWN_ERROR",
+  UNKNOWN_ERROR: "UNKNOWN_ERROR"
 } as const;
 
 export const ERROR_MESSAGES = {
@@ -44,9 +44,9 @@ export const ERROR_MESSAGES = {
       "Check back tomorrow to continue playing",
       type === "story"
         ? "The game requires story generation to function"
-        : "Images enhance the experience but aren't required",
+        : "Images enhance the experience but aren't required"
     ],
-    iconType: "quota" as const,
+    iconType: "quota" as const
   },
   [ERROR_CODES.TOKEN_LIMIT_EXCEEDED]: {
     userMessage:
@@ -54,14 +54,14 @@ export const ERROR_MESSAGES = {
     httpStatus: 400,
     retryable: false,
     title: "Content Too Long",
-    description: (type: "story" | "image") =>
+    description: (_type: "story" | "image") =>
       `Your request or conversation history is too long. Try a shorter message or start a new game.`,
-    suggestions: (type: "story" | "image") => [
+    suggestions: (_type: "story" | "image") => [
       "Start a new game to reset the conversation",
       "Use shorter messages",
-      "The conversation history may be too long",
+      "The conversation history may be too long"
     ],
-    iconType: "invalid" as const,
+    iconType: "invalid" as const
   },
   [ERROR_CODES.AUTHENTICATION_ERROR]: {
     userMessage:
@@ -69,28 +69,28 @@ export const ERROR_MESSAGES = {
     httpStatus: 401,
     retryable: false,
     title: "Service Configuration Issue",
-    description: (type: "story" | "image") =>
+    description: (_type: "story" | "image") =>
       `There's an issue with the AI service configuration. Please contact support if this persists.`,
-    suggestions: (type: "story" | "image") => [
+    suggestions: (_type: "story" | "image") => [
       "This is likely a temporary service issue",
       "Contact support if the problem persists",
-      "Try again in a few minutes",
+      "Try again in a few minutes"
     ],
-    iconType: "auth" as const,
+    iconType: "auth" as const
   },
   [ERROR_CODES.RATE_LIMITED]: {
     userMessage: "Too many requests. Please wait a moment and try again.",
     httpStatus: 429,
     retryable: true,
     title: "Too Many Requests",
-    description: (type: "story" | "image") =>
+    description: (_type: "story" | "image") =>
       `Too many requests have been made recently. Please wait a moment before trying again.`,
-    suggestions: (type: "story" | "image") => [
+    suggestions: (_type: "story" | "image") => [
       "Wait 1-2 minutes before retrying",
       "Avoid rapid successive requests",
-      "The service will become available again shortly",
+      "The service will become available again shortly"
     ],
-    iconType: "quota" as const,
+    iconType: "quota" as const
   },
   [ERROR_CODES.NETWORK_ERROR]: {
     userMessage:
@@ -98,28 +98,28 @@ export const ERROR_MESSAGES = {
     httpStatus: 503,
     retryable: true,
     title: "Connection Problem",
-    description: (type: "story" | "image") =>
+    description: (_type: "story" | "image") =>
       `There's a problem with your internet connection or the AI service is temporarily unavailable.`,
-    suggestions: (type: "story" | "image") => [
+    suggestions: (_type: "story" | "image") => [
       "Check your internet connection",
       "Try refreshing the page",
-      "The service might be temporarily down",
+      "The service might be temporarily down"
     ],
-    iconType: "network" as const,
+    iconType: "network" as const
   },
   [ERROR_CODES.INVALID_REQUEST]: {
     userMessage: "Invalid request. Please try again with different input.",
     httpStatus: 400,
     retryable: false,
     title: "Invalid Request",
-    description: (type: "story" | "image") =>
+    description: (_type: "story" | "image") =>
       `The request format is invalid. This might be a temporary issue - please try again.`,
-    suggestions: (type: "story" | "image") => [
+    suggestions: (_type: "story" | "image") => [
       "Try rephrasing your message",
       "Start a new game if the issue persists",
-      "This is usually a temporary problem",
+      "This is usually a temporary problem"
     ],
-    iconType: "invalid" as const,
+    iconType: "invalid" as const
   },
   [ERROR_CODES.UNKNOWN_ERROR]: {
     userMessage: "An unexpected error occurred. Please try again.",
@@ -130,13 +130,13 @@ export const ERROR_MESSAGES = {
       `An unexpected error occurred with ${
         type === "story" ? "story generation" : "image generation"
       }. This is usually temporary.`,
-    suggestions: (type: "story" | "image") => [
+    suggestions: (_type: "story" | "image") => [
       "Try again in a few moments",
       "Refresh the page if problems continue",
-      "This is usually a temporary issue",
+      "This is usually a temporary issue"
     ],
-    iconType: "unknown" as const,
-  },
+    iconType: "unknown" as const
+  }
 } as const;
 
 type CodeError = keyof typeof ERROR_CODES;
@@ -221,7 +221,7 @@ export function parseGeminiError(error: unknown): ApiError {
     message,
     userMessage: errorConfig.userMessage,
     httpStatus: errorConfig.httpStatus,
-    retryable: errorConfig.retryable,
+    retryable: errorConfig.retryable
   };
 }
 
@@ -236,14 +236,14 @@ export function createErrorResponse(error: unknown, context?: string) {
     code: apiError.code,
     message: apiError.message,
     userMessage: apiError.userMessage,
-    originalError: error,
+    originalError: error
   });
 
   return NextResponse.json(
     {
       error: apiError.userMessage,
       code: apiError.code,
-      retryable: apiError.retryable,
+      retryable: apiError.retryable
     },
     { status: apiError.httpStatus }
   );
